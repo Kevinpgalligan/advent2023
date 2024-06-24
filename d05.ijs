@@ -18,3 +18,7 @@ part1 =: monad define
 
 NB. Part 2.
 NB. TODO
+NB. Have to consider ranges of seed values. So we have an N x 2 array at
+NB. step. Each range, when mapped, can output multiple new ranges. SO, need
+NB. to output a list of boxes, each box containing multiple ranges. Then just
+NB. remove a layer of boxing.
