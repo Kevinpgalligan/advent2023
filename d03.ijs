@@ -2,7 +2,6 @@ NB. Day 3: Gear Ratios
 NB. https://adventofcode.com/2023/day/3
 
 load 'regex'
-require 'printf'
 
 in =: fread 'input03'
 sample =: 0 : 0
@@ -60,7 +59,6 @@ part2 =: monad define
   coords =. width getCoords"0 1 matches
   symCoords =. (<.@:(%&width) , width&|)"0 I. isSymbol"0 y
   NB. This is different.
-  NB.  
   table =. symCoords (isNextToSym"1 2)/ coords
   +/ (*/)"1 ns {~ I."1 (((2&=)@:(+/))"1 table) # table
 )
