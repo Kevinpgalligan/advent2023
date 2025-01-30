@@ -2,45 +2,6 @@ NB. Day 5: If You Give A Seed A Fertilizer
 
 in =: fread 'input05'
 
-0 : 0
-DEBUGGING.
-
-TODO - figure out why '0 0' is in the output after 3 remappings.
-
-Manually stepping through part 2....
-
-79 92
-55 67
-
-vvvvv
-
-77 90
-53 65
-
-vvvvv
-
-77 90
-54 65
-14 14
-
-vvvvv
-
-77 90
-61 65
-58 60
-7 10
-25 25
-
-
-Actual output:
-77 90
-61 65
-58 60
- 7 10
- 0  0
-25 25
-)
-
 sample =: 0 : 0
 seeds: 79 14 55 13
 
@@ -98,7 +59,11 @@ intersects =: dyad define
   ((intervalStart x) <: (intervalEnd y)) * ((intervalStart y) <: (intervalEnd x))
 )
 intervalIntersection =: dyad define
-  ((intervalStart x) >. (intervalStart y)) , ((intervalEnd x) <. (intervalEnd y))
+  if. (0 = # x) +. (0 = # y) +. (-. x intersects y) do.
+    0 $ 0
+  else.
+    ((intervalStart x) >. (intervalStart y)) , ((intervalEnd x) <. (intervalEnd y))
+  end.
 )
 intervalContains =: dyad define
   ((intervalStart x) <: intervalStart y) * ((intervalEnd y) <: intervalEnd x)
@@ -107,7 +72,11 @@ intervalCompletelyContains =: dyad define
   ((intervalStart x) < intervalStart y) * ((intervalEnd y) < intervalEnd x)
 )
 intervalComplement =: dyad define
-  if. x intervalCompletelyContains y do.
+  if. 0 = # x do.
+    0 0 $ 0  NB. empty interval
+  elseif. 0 = # y do.
+    x
+  elseif. x intervalCompletelyContains y do.
     _2 ,\ (intervalStart x),(<: intervalStart y),(>: intervalEnd y),(intervalEnd x)
   elseif. y intervalContains x do.
     0 0 $ 0
@@ -124,7 +93,7 @@ mapSrcInterval =: {. , <:@:({. + {:)
 mapOffset =: 1&{ - {.
 applyMap =: dyad define
   NB. Takes an intersecting interval (start,end) and
-  NB. map (srcStart,destStart,length) that, and returns
+  NB. map (srcStart,destStart,length), and returns
   NB. the output from applying the map.
   (mapOffset y) + x intervalIntersection (mapSrcInterval y)
 )
@@ -150,9 +119,5 @@ part2 =: monad define
   intervals =. ({. , (<:@:(+/)))"(1) _2 ,\ ". (}.~ >:@:(i.&':')) > {. sections
   parseMap =. {{ ". ;._1 LF , (}.~ >:@(i.&LF)) y }}
   maps =. parseMap each }. sections
-  NB. intervals ]F.. {{ ; (remapInterval&(>x)) each <"1 y }} |. maps
-  m1 =. ; (remapInterval& (> {. maps)) each <"1 intervals
-  m2 =. ; (remapInterval& (> 1 { maps)) each <"1 m1
-  m3 =. ; (remapInterval& (> 2 { maps)) each <"1 m2
-  m3
+  intervals ]F.. {{ ; (remapInterval&(>x)) each <"1 y }} |. maps
 )
