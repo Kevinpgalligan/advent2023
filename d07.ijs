@@ -11,7 +11,8 @@ QQQJA 483
 )
 
 NB. Part 1.
-ranks =: 5; 4 1; 3 2; 3 1 1; 2 2 1; 2 1 1 1; 5 $ 1
+NB. Can't just put '5' because it'd be a scalar, not an array!
+ranks =: (1 $ 5); 4 1; 3 2; 3 1 1; 2 2 1; 2 1 1 1; 5 $ 1
 handKey =: {{ (ranks i. < \:~ #/.~ y) ; ('AKQJT98765432' (i."_ 0) y) }}
 part1 =: monad define
   rounds =. (' '&splitstring) ;._2 y
@@ -21,4 +22,18 @@ part1 =: monad define
 )
 
 NB. Part 2
-NB. TODO
+bestPossibleHand =: monad define
+  NB. TODO
+  NB. Generate all the possible hands
+  NB. Find their ranks
+  NB. Pick the lowest
+  NB. This gives the rank of an individual hand:
+  (ranks i. < \:~ #/.~ y)
+)
+handKey2 =: {{ (bestPossibleHand y) ; ('AKQJT98765432' (i."_ 0) y) }}
+part2 =: monad define
+  rounds =. (' '&splitstring) ;._2 y
+  bids =. > ". each , {:"1 rounds
+  ordering =. \: handKey2"1 >"0 {."1 rounds
+  +/ (>: i. $ bids) * (ordering { bids)
+)
