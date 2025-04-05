@@ -12,11 +12,12 @@ QQQJA 483
 
 NB. Part 1.
 ranks =: 5; 4 1; 3 2; 3 1 1; 2 2 1; 2 1 1 1; 5 $ 1
-handKey =: {{ (ranks i. < \:~ #/.~ y) ; (/:~ 'AKQJT98765432' (i."_ 0) y) }}
+handKey =: {{ (ranks i. < \:~ #/.~ y) ; ('AKQJT98765432' (i."_ 0) y) }}
 part1 =: monad define
   rounds =. (' '&splitstring) ;._2 y
+  bids =. > ". each , {:"1 rounds
   ordering =. \: handKey"1 >"0 {."1 rounds
-  +/ (>: i. (# ordering)) * ordering { > ". each , {:"1 rounds
+  +/ (>: i. $ bids) * (ordering { bids)
 )
 
 NB. Part 2
