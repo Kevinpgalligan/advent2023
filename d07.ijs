@@ -23,14 +23,17 @@ part1 =: monad define
 
 NB. Part 2
 bestPossibleHand =: monad define
-  NB. TODO
-  NB. Generate all the possible hands
-  NB. Find their ranks
-  NB. Pick the lowest
-  NB. This gives the rank of an individual hand:
-  (ranks i. < \:~ #/.~ y)
+  jokerMask =. 'J' = y
+  counts =. \:~ #/.~ (-. jokerMask) # y
+  NB. Best hand always comes from all jokers representing the highest-frequency
+  NB. non-joker. Edge case when all 5 cards are jokers.
+  if. (+/ jokerMask) -: 5 do.
+    0 NB. 5-of-a-kind
+  else.
+    ranks i. < ((+/ jokerMask) + {. counts) , (}. counts)
+  end.
 )
-handKey2 =: {{ (bestPossibleHand y) ; ('AKQJT98765432' (i."_ 0) y) }}
+handKey2 =: {{ (bestPossibleHand y) ; ('AKQT98765432J' (i."_ 0) y) }}
 part2 =: monad define
   rounds =. (' '&splitstring) ;._2 y
   bids =. > ". each , {:"1 rounds
