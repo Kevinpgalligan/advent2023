@@ -9,7 +9,7 @@ sample =: 0 : 0
 
 calc =: monad define
   diffs =. {{
-    if. 0 = +/ y do.
+    if. *./ 0 = y do.
       1 Z: 1 NB. stop fold
     else.
       2 -/\ y
