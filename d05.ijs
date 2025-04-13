@@ -53,14 +53,16 @@ part1 =: monad define
 )
 
 NB. Part 2.
+intervalLength =: -~/
+emptyInterval =: (0: = intervalLength)
 intervalStart =: {.
 intervalEnd =: {:
 intersects =: dyad define
-  ((intervalStart x) <: (intervalEnd y)) * ((intervalStart y) <: (intervalEnd x))
+  ((intervalStart x) < (intervalEnd y)) * ((intervalStart y) < (intervalEnd x))
 )
 intervalIntersection =: dyad define
-  if. (0 = # x) +. (0 = # y) +. (-. x intersects y) do.
-    0 $ 0
+  if. -. x intersects y do.
+    0 0 NB. empty interval
   else.
     ((intervalStart x) >. (intervalStart y)) , ((intervalEnd x) <. (intervalEnd y))
   end.
@@ -72,28 +74,26 @@ intervalCompletelyContains =: dyad define
   ((intervalStart x) < intervalStart y) * ((intervalEnd y) < intervalEnd x)
 )
 intervalComplement =: dyad define
-  if. 0 = # x do.
-    0 0 $ 0  NB. empty interval
-  elseif. 0 = # y do.
-    x
-  elseif. x intervalCompletelyContains y do.
-    _2 ,\ (intervalStart x),(<: intervalStart y),(>: intervalEnd y),(intervalEnd x)
+  if. x intervalCompletelyContains y do.
+    _2 ,\ (intervalStart x),(intervalStart y),(intervalEnd y),(intervalEnd x)
   elseif. y intervalContains x do.
     0 0 $ 0
   elseif. (x intersects y) * (intervalStart x) < intervalStart y do.
-    ,: (intervalStart x) , <: intervalStart y
+    ,: (intervalStart x) , intervalStart y
   elseif. x intersects y do.
-    ,: (>: intervalEnd y) , intervalEnd x
+    ,: (intervalEnd y) , intervalEnd x
   else.
     ,: x
   end.
 )
 
-mapSrcInterval =: {. , <:@:({. + {:)
-mapOffset =: 1&{ - {.
+mapSrcInterval =: monad define
+  (1 { y) , (({: y) + 1 { y)
+)
+mapOffset =: {. - 1&{
 applyMap =: dyad define
   NB. Takes an intersecting interval (start,end) and
-  NB. map (srcStart,destStart,length), and returns
+  NB. map (destStart,srcStart,length), and returns
   NB. the output from applying the map.
   (mapOffset y) + x intervalIntersection (mapSrcInterval y)
 )
@@ -112,12 +112,24 @@ remapInterval =: {{
   remaining , outputs
 }}
 
+NB. This was painful and I'm sure I could've done it an easier way.
 part2 =: monad define
-  NB. Almost the same as part 1, just with different parsing and
-  NB. have to deal with intervals instead of individual seed values.
   sections =. (LF , LF) splitstring y
-  intervals =. ({. , (<:@:(+/)))"(1) _2 ,\ ". (}.~ >:@:(i.&':')) > {. sections
+  NB. This time, represent seeds as a collection of intervals
+  NB. rather than individual numbers.
+  intervals =. ({. , +/)"(1) _2 ,\ ". ':' takeafter > {. sections
   parseMap =. {{ ". ;._1 LF , (}.~ >:@(i.&LF)) y }}
   maps =. parseMap each }. sections
-  intervals ]F.. {{ ; (remapInterval&(>x)) each <"1 y }} |. maps
+
+  NB. Does a fold over the array of "maps".
+  NB. Each set of maps is contained in a box, since the sets contain
+  NB. different numbers of ranges. E.g. the seed-to-soil and soil-to-fertilizer
+  NB. maps in the sample have 2 and 3 ranges, respectively.
+  NB. The input to each step of the fold is: a set of maps, and the current
+  NB. intervals. The output is the new intervals, after applying the maps to
+  NB. the old intervals.
+  finalIntervals =. intervals ]F.. {{ ; remapInterval&(>x) each <"1 y }} maps
+  NB. Finally, filter out the empty intervals (not sure how they snuck in there, I
+  NB. think it's a bug in the interval code?) and find the minimum.
+  <./ , (#~ (-.@emptyInterval"1)) finalIntervals
 )
