@@ -40,8 +40,17 @@ part1 =: monad define
 
 NB. For part 2, instead of storing a single current state, we need
 NB. multiple states. Represented as an array of boxed strings.
+NB. Note: A brute force attempt seems to run indefinitely. This
+NB.       suggests that maybe a smarter approach is needed.
+NB.       Assuming there isn't a bug in my code, and assuming my code isn't taking
+NB.       forever because it's inefficient, an alternative approach
+NB.       might be to independently follow the path of each state until it
+NB.       enters a loop. Find the earliest end state in that loop. Find the length
+NB.       of the loop. Then get the lowest common multiple of all the loop lengths.
+NB.       A bit finnicky, though.
 isStartState =: {{ 'A' = {: y }}
 isEndState =: {{ 'Z' = {: y }}
+
 part2 =: monad define
   lines =. LF splitstring y
   dirs =. > {. lines
@@ -49,17 +58,14 @@ part2 =: monad define
   map =. _3 ,\ ; parseNodeSpec each mapRaw
   keepGoing =. {{
     'curr i dirs map' =. y
-    *./ ; isEndState each curr
+    -. *./ ; isEndState each curr
   }}
-  NB. TODO:
-  NB.   1. modify rec to handle list of states.
-  NB.   2. modify initial value for 'curr' so that it's list of start states
-  NB.   3. (optional) remove duplicate states after each round of transitions
   rec =. {{
     'curr i dirs map' =. y
-    row =. , (#~ ((curr&-:) @ (0&{::))"1) map
-    newCurr =. ('R' = ((# dirs) | i) { dirs) {:: }. row
+    rows =. (#~ ((e.&curr) @ {.)"1) map
+    newCurr =. , ('R' = ((# dirs) | i) { dirs) {"_ 1 }."1 rows
     newCurr ; (>: i) ; dirs ; < map
   }}
-  1 {:: (rec^:keepGoing^:_) 'AAA' ; 0 ; dirs ; < map
+  startStates =. (#~ (isStartState@>)"0) , {."1 map
+  1 {:: (rec^:keepGoing^:_) startStates ; 0 ; dirs ; < map
 )
