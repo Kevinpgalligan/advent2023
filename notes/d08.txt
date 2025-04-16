@@ -1,0 +1,58 @@
+## Brainstorming
+Let S_i for 1<=i<=N be the number of steps to reach each end state the path encounters, before entering a loop, and define k such that for all i>=k, S_i occurred within the loop.
+
+Also let L be the number of steps in the loop.
+
+Then each path will have the following number of steps till an end state.
+
+S_1, S_2, ..., S_{k-1},
+
+AND, for j>=0,
+S_k+jL
+S_{k+1}+jL
+...
+S_N+jL
+
+Now, across all sets of paths, need to find smallest number of steps.
+
+Given two sets...
+
+S_k     + i L_1
+S_{k+1} + i L_1
+...
+S_N1    + i L_1
+
+and
+
+Z_k     + j L_2
+Z_{k+1} + j L_2
+...
+Z_N2    + j L_2
+
+To find matches between these sets, need to find i & j such that:
+   S_* + i L_1 = Z_* + j L_2
+for any S_* and Z_*.
+
+Simple approach from there: pick a particular path, for each end state it encounters find the earliest match with all other paths? Not sure how intensive that'd be.
+
+            set of all paths (num steps)
+              v
+min_s { s \in S \forall S }
+        -> \exists i : S_k + i L_k = s
+           For a given s... check that s-S_k>=0 and L_k divides s-S_k.
+
+Okay, but how to generate values of s? We don't want to try s=1,2,...
+One approach: take a particular path, for each of its end states find
+the min number of steps it takes to coincide with all other paths.
+Is it possible that a path will NEVER be in a specific end state at the same time as all the other paths are in end states? Yes. Imagine there are two paths that have a loop of the same length.
+
+There may be a way to detect that? Using gcd magic, perhaps.
+Reconsider any pair of end states from different paths.
+   S_* + i L_1 = Z_* + j L_2
+We need i and j such that:
+   i L_1 - j L_2 = Z_* - S_*
+This only has solutions if gcd(L_1, L_2) divides Z_*-S_*, otherwise the equation can't be true.
+
+Does it make sense to find G=gcd(L_1, L_2, ..., L_whatever)...
+Then, for Z_*, we need S_* such that S_* = Z_* (mod G).
+I'm not sure about this. Need to think more. 
