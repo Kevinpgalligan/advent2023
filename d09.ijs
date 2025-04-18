@@ -7,6 +7,9 @@ sample =: 0 : 0
 10 13 16 21 30 45
 )
 
+NB. Swap '-' for '_' so numbers are read properly.
+parseSeqs =: {{ (<@".) ;._2 ('-';'_') stringreplace y }}
+
 calc =: monad define
   diffs =. {{
     if. *./ 0 = y do.
@@ -18,7 +21,21 @@ calc =: monad define
   ({: y) + +/ ({. F: diffs |. y)
 )
 part1 =: monad define
-  NB. Swap '-' for '_' so numbers are read properly.
-  seqs =. (<@".) ;._2 ('-';'_') stringreplace y
+  seqs =. parseSeqs y
   +/ > calc each seqs
+)
+
+calc2 =: monad define
+  diffs =. {{
+    if. *./ 0 = y do.
+      1 Z: 1
+    else.
+      2 -/\ y
+    end.
+  }}
+  -/ ({. y) , ({: F: diffs |. y)
+)
+part2 =: monad define
+  seqs =. parseSeqs y
+  +/ > calc2 each seqs
 )

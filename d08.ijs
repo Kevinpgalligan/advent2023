@@ -175,4 +175,5 @@ If it takes L steps to reach start state, and loop is L steps, then we hit end s
 all multiples of L. So just find LCM of all loop lengths. LCM is *./ in J, so the answer is...
 
 *./ 11567 19637 15871 21251 12643 19099
+  (the answer is ~13 trillion, never would've finished with brute force)
 )
