@@ -46,7 +46,7 @@ part1 =: monad define
   surrounding =. (_2 ,\ 0 1 0 _1 1 0 _1 0) +"1 1 start
   NB. Use this mask to pick the two surrounding tiles that connect to start.
   NB. E.g. to connect to start, a tile to the east must be -, J or 7.
-  mask =. (_3 ,\ ; '-J7' ; '-FL' ; 'LJ|' ; '7F|') e.~"1 0 (idxify surrounding) { grid
+  mask =. (_3 ,\ ; '-J7' ; '-FL' ; 'LJ|' ; '7F|') e.~"1 0 surrounding get2d grid
   NB. Mark the start tile as visited, to start.
   visited =. 1 (idxify start)} ($ grid) $ 0
 
@@ -58,7 +58,7 @@ part1 =: monad define
     grid =. x
     'queue maxDist visited' =. y
     'dist cur'  =. {. queue
-    if. (idxify cur) { visited do.
+    if. cur get2d visited do.
       (}. queue) ; maxDist ; visited
     else.
       NB. Filter out neighbouring tiles we've already visited.
@@ -71,3 +71,9 @@ part1 =: monad define
   }}
   1 {:: ((grid&rec)^:keepGoing^:_) ((1&;)"1 mask # surrounding) ; 0 ; visited
 )
+
+NB. Part 2 brainstorm...
+NB.   Fill algo from each empty tiles, counting (and marking
+NB.     as visited) all the empty tiles.
+NB.   If fill hits the edge: discard.
+NB.   Else: add to final count.

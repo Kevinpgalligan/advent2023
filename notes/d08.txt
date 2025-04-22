@@ -56,3 +56,93 @@ This only has solutions if gcd(L_1, L_2) divides Z_*-S_*, otherwise the equation
 Does it make sense to find G=gcd(L_1, L_2, ..., L_whatever)...
 Then, for Z_*, we need S_* such that S_* = Z_* (mod G).
 I'm not sure about this. Need to think more. 
+
+
+## Brainstorming from work laptop
+S_1,1 + i L_1
+S_1,2 + i L_1
+...
+S_1,{n_1} + i L_1
+
+S_2,1 + i L_2
+S_2,2 + i L_2
+...
+S_2,{n_2} + i L_2
+
+...
+
+Let's say we have a matching pair:
+    S_1,x + i_1 L_1
+          =
+    S_2,y + i_2 L_2
+
+This requires that gcd(L1,L2) divides S_{1,x}-S_{2,y}.
+   
+If we want to find a 3rd match, we need...
+
+    gcd(L1,L3) divides S_{1,x}-S_{3,z}
+    gcd(L2,L3) divides S_{2,y}-S_{3,z}
+
+Is it equivalent to say...
+
+    gcd(L1,L2,L3) divides:
+      S_{1,x}-S_{2,x}
+      S_{1,x}-S_{3,z}
+      S_{2,y}-S_{3,z}
+
+?
+
+Hmm, I don't think so.
+Since
+  gcd(L1,L2,L3) <= gcd(L1,L2),
+I think `gcd(L1,L2)|S_{1,x}-S_{2,y}` implies that `gcd(L1,L2,L3)|...`, but not
+vice versa. Could end up with gcd(L1,...,LN)=1 and it'd pass all the constraints.
+
+Okay, so how to find a number of steps that satisfies at least one constraint from each bucket?
+
+What we're looking for!
+min_s {s \in natnums : \foreach i \in 1..P \exists a,b s.t. s = S_{i,a} + b L_i}
+
+To generate step counts that ensure the first path is on a final state...
+Just loop through S_1,1 -> S_1,{n_1} on repeat, adding L_1 after each iteration.
+Could then check if the step count s satisfies (s%L_i)\in{S_{i,1}, ..., S_{i,n_i}}
+(Not quite... but almost. Edge case, what if S_{i,1}>=L_i?)
+
+Okay, let's get stupid again. We saw there are ~5 start states. What if each of those states results in a loop with only 6 end states. There would only be ~7000 combinations of all those end states, which is feasible to bruteforce.
+
+Step 1: calculate loops.
+Step 2: come up with a way to satisfy each set of possibilities.
+        S_1 + i_1 L_1 = s
+        S_2 + i_2 L_2 = s
+        ...
+        S_N + i_N L_N = s
+        ^          ^ known
+        known
+        That's... N+1 unknowns and N equations.
+        Hmm, maybe it's important that s (and the i's) have infinitely
+        many solutions, there's a "free variable" somewhere.
+
+        S_1+i_1L_1 = S_2+i_2L_2 = ... = s
+
+        Can use GCD trick to ensure that it's POSSIBLE, at least.
+        S_1 + i_1 L_1 = S_2 + i_2 L_2
+        Maybe find one pair first, giving i_1 and i_2. All future
+        synchs will have to be multiples of those, right? Which can
+        be used to find i_3????
+
+        s1 + i1 L1 = s2 + i2 L2
+        i1 = L1^-1 (s2-s1)   (mod L2)
+        i1 = L1^-1 (s3-s1)   (mod L3)
+
+        Given...
+        x = a1  (mod m1)
+        x = a2  (mod m2)
+        ...
+        This is the Chinese remainder theorem! the m_i must be pairwise coprime,
+        gcd(m_i,m_j)=1 for all i,j.
+        See:
+          https://en.wikipedia.org/wiki/Chinese_remainder_theorem#Computation
+        Wiki also mentions the case where the loop lengths are non-coprime.
+        In that case, the solutions must all be equivalent modulo gcd(L1,...LN) (I think).
+
+Step 3: pick the minimum.
